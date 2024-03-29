@@ -125,7 +125,7 @@ func (a *agent) Start(ctx context.Context) {
 		var (
 			cleanupInterval = a.retentionPeriod / 2
 			jobObjects      = []db.Storer{
-				new(db.RunEvent),
+				//new(db.RunEvent),
 			}
 			cdb = a.db.WithContext(ctx)
 

@@ -171,6 +171,7 @@ func createChatMessageFromToolOutput(toolOutput openai.RunStepObject_StepDetails
 // compileChunksAndApplyStatuses compiles the chat completion chunks into a run step and a message, if necessary.
 // The parameters are passed in should have all ID values set except for the primary ID, which will be set on creation.
 func compileChunksAndApplyStatuses(ctx context.Context, l *slog.Logger, gdb *gorm.DB, run *db.Run, stream <-chan db.ChatCompletionResponseChunk) error {
+	// TODO(njhale): Compile chat completion response usage for run step
 	var (
 		runStep = &db.RunStep{
 			AssistantID: run.AssistantID,

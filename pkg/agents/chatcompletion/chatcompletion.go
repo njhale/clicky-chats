@@ -14,6 +14,7 @@ import (
 	"github.com/gptscript-ai/clicky-chats/pkg/db"
 	"github.com/gptscript-ai/clicky-chats/pkg/generated/openai"
 	"github.com/gptscript-ai/clicky-chats/pkg/trigger"
+	"gorm.io/datatypes"
 	"gorm.io/gorm"
 )
 
@@ -234,18 +235,18 @@ func (a *agent) Start(ctx context.Context) {
 				if err := tx.Delete(new(db.CreateChatCompletionRequest), "id IN ? AND done = true", requestIDs).Error; err != nil {
 					return err
 				}
-
-				if len(ccs) != 0 {
-					if err := tx.Delete(ccs).Error; err != nil {
-						return err
-					}
-				}
-
-				if len(cccs) != 0 {
-					if err := tx.Delete(cccs).Error; err != nil {
-						return err
-					}
-				}
+				//
+				//if len(ccs) != 0 {
+				//	if err := tx.Delete(ccs).Error; err != nil {
+				//		return err
+				//	}
+				//}
+				//
+				//if len(cccs) != 0 {
+				//	if err := tx.Delete(cccs).Error; err != nil {
+				//		return err
+				//	}
+				//}
 
 				return nil
 			}); err != nil {
@@ -302,6 +303,12 @@ func (a *agent) run(ctx context.Context) error {
 
 	l.Debug("Found chat completion", "cc", cc)
 	if z.Dereference(cc.Stream) {
+		l.Debug("Counting prompt tokens...")
+		promptTokens, err := countPromptTokens(cc.Model, cc.Messages)
+		if err != nil {
+			l.Warn("Prompt token count failed", "counted", promptTokens, "err", err)
+		}
+
 		l.Debug("Streaming chat completion...")
 		stream, err := agents.StreamChatCompletionRequest(ctx, l, a.client, url, a.apiKey, cc)
 		if err != nil {
@@ -309,7 +316,7 @@ func (a *agent) run(ctx context.Context) error {
 			return err
 		}
 
-		if err = streamResponses(a.db.WithContext(ctx), chatCompletionID, stream); err != nil {
+		if err = streamResponses(a.db.WithContext(ctx), chatCompletionID, promptTokens, stream); err != nil {
 			l.Error("Failed to stream chat completion responses", "err", err)
 		}
 
@@ -338,7 +345,7 @@ func (a *agent) run(ctx context.Context) error {
 	return nil
 }
 
-func streamResponses(gdb *gorm.DB, chatCompletionID string, stream <-chan db.ChatCompletionResponseChunk) error {
+func streamResponses(gdb *gorm.DB, chatCompletionID string, promptTokens int, stream <-chan db.ChatCompletionResponseChunk) error {
 	var (
 		index int
 		errs  []error
@@ -359,6 +366,12 @@ func streamResponses(gdb *gorm.DB, chatCompletionID string, stream <-chan db.Cha
 			Done:      true,
 		},
 		ResponseIdx: index,
+		Usage: datatypes.NewJSONType(&openai.CompletionUsage{
+			PromptTokens: promptTokens,
+			// TODO(njhale): Confirm that the number of response chunks is roughly equivalent to the amount of response tokens produced.
+			CompletionTokens: index,
+			TotalTokens:      promptTokens + index,
+		}),
 	}
 	if err := gdb.Transaction(func(tx *gorm.DB) error {
 		if err := db.Create(tx, chunk); err != nil {
