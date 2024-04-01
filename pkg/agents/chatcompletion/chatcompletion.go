@@ -235,13 +235,13 @@ func (a *agent) Start(ctx context.Context) {
 				if err := tx.Delete(new(db.CreateChatCompletionRequest), "id IN ? AND done = true", requestIDs).Error; err != nil {
 					return err
 				}
-				//
-				//if len(ccs) != 0 {
-				//	if err := tx.Delete(ccs).Error; err != nil {
-				//		return err
-				//	}
-				//}
-				//
+				if len(ccs) != 0 {
+					if err := tx.Delete(ccs).Error; err != nil {
+						return err
+					}
+				}
+				// TODO(njhale): Add some logic so that chunks associated with run steps aren't deleted until their usage has been copied over to the respective step.
+
 				//if len(cccs) != 0 {
 				//	if err := tx.Delete(cccs).Error; err != nil {
 				//		return err
@@ -367,8 +367,10 @@ func streamResponses(gdb *gorm.DB, chatCompletionID string, promptTokens int, st
 		},
 		ResponseIdx: index,
 		Usage: datatypes.NewJSONType(&openai.CompletionUsage{
-			PromptTokens: promptTokens,
 			// TODO(njhale): Confirm that the number of response chunks is roughly equivalent to the amount of response tokens produced.
+			// TODO(njhale): Ensure tool calls are counted.
+			// TODO(njhale): Since a run step can result in multiple chat completions to different models, we'll probably need to add a model field so that users can attribute token usage correctly.
+			PromptTokens:     promptTokens,
 			CompletionTokens: index,
 			TotalTokens:      promptTokens + index,
 		}),
