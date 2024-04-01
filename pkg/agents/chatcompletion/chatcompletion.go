@@ -304,7 +304,7 @@ func (a *agent) run(ctx context.Context) error {
 	l.Debug("Found chat completion", "cc", cc)
 	if z.Dereference(cc.Stream) {
 		l.Debug("Counting prompt tokens...")
-		promptTokens, err := countPromptTokens(cc.Model, cc.Messages)
+		promptTokens, err := countPromptTokens(cc.Model, cc)
 		if err != nil {
 			l.Warn("Prompt token count failed", "counted", promptTokens, "err", err)
 		}

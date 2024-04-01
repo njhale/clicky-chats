@@ -38,6 +38,19 @@ func StreamChatCompletionRequest(ctx context.Context, l *slog.Logger, client *ht
 		return nil, err
 	}
 
+	// TODO(njhale): --- START Remove me! ---
+	file, err := os.OpenFile("chat-completions.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	encoder := json.NewEncoder(file)
+	if err := encoder.Encode(cc); err != nil {
+		panic(err)
+	}
+	// TODO(njhale): --- END Remove me! ---
+
 	l.Debug("Making stream chat completion request", "request", string(b))
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(b))
