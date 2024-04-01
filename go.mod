@@ -4,6 +4,8 @@ go 1.22.0
 
 replace github.com/deepmap/oapi-codegen/v2 => github.com/thedadams/oapi-codegen/v2 v2.0.0-20240328215647-949fe1294bfe
 
+replace github.com/gptscript-ai/gptscript => ../gptscript
+
 require (
 	github.com/acorn-io/broadcaster v0.0.0-20240105011354-bfadd4a7b45d
 	github.com/acorn-io/cmd v0.0.0-20240203032901-e9e631185ddb
@@ -81,6 +83,9 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf // indirect
 	github.com/therootcompany/xz v1.0.1 // indirect
+	github.com/tidwall/gjson v1.17.1 // indirect
+	github.com/tidwall/match v1.1.1 // indirect
+	github.com/tidwall/pretty v1.2.0 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	go4.org v0.0.0-20200411211856-f5505b9728dd // indirect
 	golang.org/x/exp v0.0.0-20240103183307-be819d1f06fc // indirect

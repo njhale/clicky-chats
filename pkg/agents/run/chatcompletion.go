@@ -222,6 +222,7 @@ func processAllChunks(ctx context.Context, gdb *gorm.DB, run *db.Run, runStep *d
 				return statusCode, toolCalls, fmt.Errorf("unexpected chat completion response: %s", z.Dereference(chunk.Error))
 			}
 
+			// TODO(njhale): Add usage to run_steps from chat completion chunk
 			// These chat completions should only have one choice.
 			responseIsMessage = responseIsMessage || len(chunk.Choices) > 0 && chunk.Choices[0].Delta.Data().Content != nil
 			if !responseIsMessage {

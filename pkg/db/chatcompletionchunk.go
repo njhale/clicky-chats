@@ -12,8 +12,7 @@ type ChatCompletionResponseChunk struct {
 	Model             string                           `json:"model"`
 	SystemFingerprint *string                          `json:"system_fingerprint,omitempty"`
 
-	// TODO(njhale): Create a new ExtendedChatCompletionResponseChunk type to allow for returning a final chunk containing the
-	// token usage for all completions. This will be dropped for streaming requests to v1/chat/completions
+	// Usage contains the
 	Usage datatypes.JSONType[*openai.CompletionUsage] `json:"usage,omitempty"`
 
 	// Not part of the public API
